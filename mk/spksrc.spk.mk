@@ -98,6 +98,11 @@ endif
 ifneq ($(strip $(SPK_ICON)),)
 	@echo package_icon=\"`convert $(SPK_ICON) -thumbnail 72x72 - | base64 -w0 -`\" >> $@
 endif
+ifneq ($(strip $(DEBUG)),)
+INSTALLER_OUTPUT = >> /root/$${PACKAGE}-$${SYNOPKG_PKG_STATUS}.log 2>&1
+else
+INSTALLER_OUTPUT = > $$SYNOPKG_TEMP_LOGFILE
+endif
 
 # Wizard
 DSM_WIZARDS_DIR = $(WORK_DIR)/WIZARD_UIFILES
@@ -138,19 +143,8 @@ define dsm_script_redirect
 $(create_target_dir)
 $(MSG) "Creating $@"
 echo '#!/bin/sh' > $@
-echo 'PATH=/bin:/usr/bin' >> $@
 echo '. `dirname $$0`/installer' >> $@
-echo '`basename $$0` > $$SYNOPKG_TEMP_LOGFILE' >> $@
-chmod 755 $@
-endef
-
-define dsm_script
-$(create_target_dir)
-$(MSG) "Creating $@"
-echo '#!/bin/sh' > $@
-echo 'PATH=/bin:/usr/bin' >> $@
-echo '. `dirname $$0`/installer' >> $@
-echo '`basename $$0`' >> $@
+echo '`basename $$0` $(INSTALLER_OUTPUT)' >> $@
 chmod 755 $@
 endef
 
@@ -166,9 +160,9 @@ $(DSM_SCRIPTS_DIR)/preinst:
 $(DSM_SCRIPTS_DIR)/postinst:
 	@$(dsm_script_redirect)
 $(DSM_SCRIPTS_DIR)/preuninst:
-	@$(dsm_script)
+	@$(dsm_script_redirect)
 $(DSM_SCRIPTS_DIR)/postuninst:
-	@$(dsm_script)
+	@$(dsm_script_redirect)
 $(DSM_SCRIPTS_DIR)/preupgrade:
 	@$(dsm_script_redirect)
 $(DSM_SCRIPTS_DIR)/postupgrade:
