@@ -1,0 +1,21 @@
+diff -Nrup x264-snapshot-20130719-2245-stable.orig/common/cpu.c x264-snapshot-20130719-2245-stable/common/cpu.c
+--- x264-snapshot-20130719-2245-stable.orig/common/cpu.c	2013-07-20 15:20:02.000000000 +0200
++++ x264-snapshot-20130719-2245-stable/common/cpu.c	2013-07-20 15:21:29.000000000 +0200
+@@ -341,6 +341,9 @@ uint32_t x264_cpu_detect( void )
+ 
+ uint32_t x264_cpu_detect( void )
+ {
++#ifdef __NO_FPRS__
++    return 0;
++#else
+     static void (*oldsig)( int );
+ 
+     oldsig = signal( SIGILL, sigill_handler );
+@@ -360,6 +363,7 @@ uint32_t x264_cpu_detect( void )
+     signal( SIGILL, oldsig );
+ 
+     return X264_CPU_ALTIVEC;
++#endif
+ }
+ #endif
+ 
